@@ -1,4 +1,3 @@
-/*
 import Exceptions.duplicateDirector;
 import Exceptions.duplicateObject;
 import org.w3c.dom.Document;
@@ -11,74 +10,15 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Objects;
 
-public class fileLoader implements model {
-    String dataBase = "C:\\Users\\EXTRAVAGANZA\\Desktop\\DB\\";
-    public String createDepartment(String name,String id_dir) throws IOException, ClassNotFoundException {
-        String emptyId = emptyId("1");
-        Department temp = new Department();
-        if(findEmployee(id_dir).getOtdel()==0 && findEmployee(id_dir)!=null)
-        {
-            temp.setDirector(id_dir);
-            temp.setName(name);
-        }
-        else
-            return "Сотрудник ID "+id_dir+" не находится в отделе переводов(СТОК) или его не существует";
-        try {
-            checkExistsDepartment(temp);
-            changeEmployee(temp.getDirector(),"отдел",emptyId);
-            FileOutputStream outputStream = new FileOutputStream(dataBase+"1_"+emptyId);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(temp);
-            objectOutputStream.close();
-
-        }
-        catch (duplicateObject ex)
-        {
-           return "Отдел с указанным именем уже существует.\nВыберите другое имя.";
-        }
-        catch (duplicateDirector ex)
-        {
-            return "Заданный сотрудник уже возглавляет другой отдел";
-        }
-        return reportDeparment(temp);
-    }
-    private Employee findEmployee(String id) throws IOException, ClassNotFoundException {
-        if(new File(dataBase+"0_"+id).exists())
-        {
-            FileInputStream fileInputStream = new FileInputStream(dataBase+"0_"+id);
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-            Employee read = (Employee) objectInputStream.readObject();
-            fileInputStream.close();
-            objectInputStream.close();
-            return read;
-        }
-        else
-            return null;
-    }
-    private void checkExistsDepartment(Department temp) throws IOException, duplicateDirector, ClassNotFoundException, duplicateObject {
-        File file = new File(dataBase);
-        String[] test = file.list();
-        ArrayList<String[]> stro4ki = new ArrayList<String[]>();
-        for (int i = 0; i < test.length; i++)
-            stro4ki.add(test[i].split("_"));
-        ArrayList<String[]> res = new ArrayList<String[]>();
-        for (int i = 0; i < stro4ki.size(); i++)
-        {
-            if(stro4ki.get(i)[0].equals("1"))
-                res.add(stro4ki.get(i));
-        }
-        for(int i=0;i<res.size();i++) {
-            FileInputStream fileInputStream = new FileInputStream(dataBase + res.get(i)[0] + "_" + res.get(i)[1]);
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-            Department read = (Department) objectInputStream.readObject();
-            if (read.getName().equals(temp.getName())) {
-                throw new duplicateObject();
-            }
-            if(read.getDirector().equals(temp.getDirector()))
-                throw new duplicateDirector();
-        }
+public class fileLoaderXml implements model {
+    private String dataBase = "C:\\Users\\Рафаэль\\Desktop\\";
+    public void setDataBase(String str)
+    {
+        dataBase = str;
     }
     private  String emptyId(String k) {
         File file = new File(dataBase);
@@ -110,28 +50,60 @@ public class fileLoader implements model {
         }
         return "";
     }
-    public  void createEmployee(String firstName,String lastName, String middleName,String depId,String phone,String salary) throws IOException {
-        Employee temp = new Employee();
-        temp.setFirstName(firstName);
-        temp.setLastName(lastName);
-        temp.setMiddleName(middleName);
-        temp.setOtdel(Integer.parseInt(depId));
-        temp.setPhone(phone);
-        temp.setSalary(Integer.parseInt(salary));
-        try {
-            checkExistsEmployee(temp);
-            FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+emptyId("0"));
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(temp);
-            objectOutputStream.close();
-        }
-        catch (duplicateObject ex)
+    private Employee findEmployee(String id) throws IOException, ClassNotFoundException {
+        if(new File(dataBase+"0_"+id).exists())
         {
-            duplicateObject.message("Сотрудник с указанными параметрами уже существует.");
+            FileInputStream fileInputStream = new FileInputStream(dataBase+"0_"+id);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            Employee read = (Employee) objectInputStream.readObject();
+            fileInputStream.close();
+            objectInputStream.close();
+            return read;
         }
-        catch(ClassNotFoundException ignored){}
+        else
+            return null;
     }
-    private  void checkExistsEmployee(Employee temp) throws duplicateObject, IOException, ClassNotFoundException {
+    private boolean checkExistsEmpID(String id)
+    {
+        boolean kek;
+        File file = new File(dataBase+"0_"+id);
+        kek = file.exists();
+        return kek;
+    }
+    private boolean checkExistsDepID(String id)
+    {
+        boolean kek;
+        File file = new File(dataBase+"1_"+id);
+        kek = file.exists();
+        return kek;
+    }
+    private boolean checkExistsDepartment(Department temp) throws IOException, ClassNotFoundException {
+        File file = new File(dataBase);
+        String[] test = file.list();
+        ArrayList<String[]> stro4ki = new ArrayList<String[]>();
+        for (int i = 0; i < test.length; i++)
+            stro4ki.add(test[i].split("_"));
+        ArrayList<String[]> res = new ArrayList<String[]>();
+        for (int i = 0; i < stro4ki.size(); i++)
+        {
+            if(stro4ki.get(i)[0].equals("1"))
+                res.add(stro4ki.get(i));
+        }
+        for(int i=0;i<res.size();i++) {
+            FileInputStream fileInputStream = new FileInputStream(dataBase + res.get(i)[0] + "_" + res.get(i)[1]);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            Department read = (Department) objectInputStream.readObject();
+            objectInputStream.close();
+            fileInputStream.close();
+            if (read.getName().equals(temp.getName())) {
+                return true;
+            }
+            if(read.getDirector().equals(temp.getDirector()))
+                return true;
+        }
+        return false;
+    }
+    private  boolean checkExistsEmployee(Employee temp) throws IOException, ClassNotFoundException {
         File file = new File(dataBase);
         String[] test = file.list();
         ArrayList<String[]> stro4ki = new ArrayList<String[]>();
@@ -148,26 +120,55 @@ public class fileLoader implements model {
             FileInputStream fileInputStream = new FileInputStream(dataBase+res.get(i)[0]+"_"+res.get(i)[1]);
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             Employee read = (Employee) objectInputStream.readObject();
-            if(read.equals(temp)) throw new duplicateObject();
             fileInputStream.close();
             objectInputStream.close();
+            if(read.getMiddleName().equals(temp.getMiddleName()) && read.getLastName().equals(temp.getLastName()) && read.getFirstName().equals(temp.getFirstName()))
+            return true;
         }
+        return false;
     }
-    private  String reportEmployee(Employee ob) {
-        String kek =
-                "Сотрудник: " +
-                        ob.getLastName() + " " +
-                        ob.getFirstName() + " " +
-                        ob.getMiddleName() + " " + "\n" +
-                        "Отдел № " +
-                        ob.getOtdel() + "\n" +
-                        "Телефон: " +
-                        ob.getPhone() +
-                        "\nРазмер зарплаты: " +
-                        ob.getSalary();
-        return kek;
+    public boolean createDepartment(String name, String id_dir) throws IOException, ClassNotFoundException
+    {
+        String emptyId = emptyId("1");
+        Department temp = new Department();
+        temp.setDirector(id_dir);
+        temp.setName(name);
+        if(checkExistsDepartment(temp)) return false;
+        if(!checkExistsEmpID(id_dir)) return false;
+        FileOutputStream outputStream = new FileOutputStream(dataBase+"1_"+emptyId);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+        objectOutputStream.writeObject(temp);
+        objectOutputStream.close();
+        return true;
     }
-    public  String showEmployee(String id) throws IOException, ClassNotFoundException {
+    public  boolean createEmployee(String firstName,String lastName, String middleName,String depId,String phone,String salary) throws IOException, ClassNotFoundException {
+        try
+        {
+            Integer.parseInt(salary);
+        }
+        catch (NumberFormatException ex)
+        {
+            return false;
+        }
+        String emptyID = emptyId("0");
+        Employee temp = new Employee();
+        temp.setFirstName(firstName);
+        temp.setLastName(lastName);
+        temp.setMiddleName(middleName);
+        temp.setOtdel(Integer.parseInt(depId));
+        temp.setPhone(phone);
+        temp.setSalary(Integer.parseInt(salary));
+        if (checkExistsEmployee(temp)) return false;
+        if(!checkExistsDepID(depId)) return false;
+        FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+emptyID);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+        objectOutputStream.writeObject(temp);
+        objectOutputStream.close();
+        return true;
+    }
+
+    public  empNode showEmployee(String id) throws IOException, ClassNotFoundException
+    {
         if(new File(dataBase+"0_"+id).exists())
         {
             FileInputStream fileInputStream = new FileInputStream(dataBase+"0_"+id);
@@ -175,16 +176,16 @@ public class fileLoader implements model {
             Employee read = (Employee) objectInputStream.readObject();
             fileInputStream.close();
             objectInputStream.close();
-            return "ID сотрудника:"+ id+"\n"+reportEmployee(read);
+            return new empNode(Integer.parseInt(id),read);
         }
         else
-           return "Сотрудник с указанным ID не существует";
+            return null;
     }
-    public  String showEmployees() throws IOException, ClassNotFoundException, TransformerException, ParserConfigurationException {
-        String resultat = "";
+    public  ArrayList<empNode>  showEmployees() throws IOException, ClassNotFoundException, TransformerException, ParserConfigurationException
+    {
         File file = new File(dataBase);
         String[] test = file.list();
-        ArrayList<Employee> array = new ArrayList<Employee>();
+        ArrayList<empNode> array = new ArrayList<empNode>();
         ArrayList<String[]> stro4ki = new ArrayList<String[]>();
         for (int i = 0; i < test.length; i++)
             stro4ki.add(test[i].split("_"));
@@ -200,17 +201,16 @@ public class fileLoader implements model {
             FileInputStream fileInputStream = new FileInputStream(dataBase+res.get(i)[0]+"_"+res.get(i)[1]);
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
             Employee read = (Employee) objectInputStream.readObject();
-            array.add(read);
-            new xmlGenerator().getEmployee(array);
-            resultat+="ID сотрудника:"+ res.get(i)[1] +"\n"+reportEmployee(read);
+            array.add(new empNode(Integer.parseInt(res.get(i)[1]),read));
             fileInputStream.close();
             objectInputStream.close();
             flag = true;
         }
-        if(!flag) return"Ни одного сотрудника не обнаружено";
-        return resultat;
+        if(!flag) return null;
+        return array;
     }
-    public String showDepartment(String id) throws IOException, ClassNotFoundException {
+    public depNode showDepartment(String id) throws IOException, ClassNotFoundException
+    {
         if(new File(dataBase+"1_"+id).exists())
         {
             FileInputStream fileInputStream = new FileInputStream(dataBase+"1_"+id);
@@ -218,13 +218,14 @@ public class fileLoader implements model {
             Department read = (Department) objectInputStream.readObject();
             fileInputStream.close();
             objectInputStream.close();
-            return "ID отдела:"+ id + reportDeparment(read);
+            return new depNode(Integer.parseInt(id),read);
         }
         else
-           return "Отдел с указанным ID не существует";
+            return null;
     }
-    public String showDepartments() throws IOException, ClassNotFoundException {
-        String resultat="";
+    public ArrayList<depNode> showDepartments() throws IOException, ClassNotFoundException
+    {
+        ArrayList<depNode> array = new ArrayList<depNode>();
         File file = new File(dataBase);
         String[] test = file.list();
         ArrayList<String[]> stro4ki = new ArrayList<String[]>();
@@ -241,22 +242,17 @@ public class fileLoader implements model {
         {
             FileInputStream fileInputStream = new FileInputStream(dataBase+res.get(i)[0]+"_"+res.get(i)[1]);
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-            Department read = (Department) objectInputStream.readObject();
-            resultat += "ID отдела:"+ res.get(i)[1] + "\n" +reportDeparment(read);
+            array.add(new depNode(Integer.parseInt(res.get(i)[1]),(Department)objectInputStream.readObject()));
             fileInputStream.close();
             objectInputStream.close();
             flag = true;
         }
-        if(!flag) return "Ни одного отдела не обнаружено";
-        return resultat;
+        if(!flag) return null;
+        return array;
     }
-    private  String reportDeparment(Department temp) {
-        String kek =
-                "Отдел:" + temp.getName()+ "\n"+
-                        "ID начальника:" + temp.getDirector();
-        return kek;
-    }
-    public  String searchDepartament(String attr,String value) throws IOException, ClassNotFoundException {
+    public  ArrayList<depNode> searchDepartament(String attr,String value) throws IOException, ClassNotFoundException
+    {
+        ArrayList<depNode> array = new ArrayList<depNode>();
         boolean flag = false;
         String resultat = "";
         File file = new File(dataBase);
@@ -282,7 +278,7 @@ public class fileLoader implements model {
                     if(read.getName().equals(value))
                     {
 
-                        resultat += "ID отдела:"+ res.get(i)[1] +reportDeparment(read);
+                        array.add(new depNode(Integer.parseInt(res.get(i)[1]),read));
                         flag = true;
                     }
                     break;
@@ -291,7 +287,7 @@ public class fileLoader implements model {
                 {
                     if(value.equals(read.getDirector()))
                     {
-                        resultat += "ID отдела:"+ res.get(i)[1] +reportDeparment(read);
+                        array.add(new depNode(Integer.parseInt(res.get(i)[1]),read));
                         flag = true;
                     }
                     break;
@@ -299,44 +295,54 @@ public class fileLoader implements model {
                 default:
                 {
                     i=res.size();
-                    resultat ="Указанный атрибут: "+attr+" не существует"+"\nВоспользуйтесь справкой -h";
                     break;
                 }
             }
         }
-        if(!flag) return "Отделы с указанным значением атрибута \""+attr+"\" = "+value+" не существуют";
-        return resultat;
+        if(!flag) return null;
+        return array;
     }
     public  String deleteDepartment(String id) throws IOException, ClassNotFoundException {
-
         FileInputStream fileInputStream = new FileInputStream(dataBase+"1_"+id);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
         Department read = (Department) objectInputStream.readObject();
         fileInputStream.close();
         objectInputStream.close();
         File file = new File(dataBase+"1_"+id);
-        if(file.delete()) {
-            return "ID отдела:" + id + reportDeparment(read) + "Успешно удалён";
+        if(checkExistsDepID(id))
+        {
+            ArrayList<empNode> empNodes =searchEmployee("отдел",id);
+            for(int i=0;i<empNodes.size();i++)
+            {
+                changeEmployee(Integer.toString(empNodes.get(i).id),"отдел",Integer.toString(0));
+            }
+            file.delete();
+            return "ID отдела:" + id + " успешно удалён";
         }
-        else {
-            return "Отдел с таким ID не существует";
-        }
+        return "Отдел № "+id+" не существует.";
     }
-    public  String deleteEmployee(String id) throws IOException, ClassNotFoundException {
+    public  String deleteEmployee(String id) throws IOException, ClassNotFoundException
+    {
+        if(checkExistsEmpID(id)) {
         FileInputStream fileInputStream = new FileInputStream(dataBase+"0_"+id);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
         Employee read = (Employee) objectInputStream.readObject();
         fileInputStream.close();
         objectInputStream.close();
+        if(id.equals(showDepartment(Integer.toString(read.getOtdel())).data.getDirector()))
+            return "Сотрудник является директором "+read.getOtdel()+" отдела. Сначала назначьте ему замену";
         File file = new File(dataBase+"0_"+id);
-        if(file.delete()) {
-            return "ID сотрудника:" + id +"" + "\n" + reportEmployee(read) + "\nУспешно удалён";
+
+            file.delete();
+            return "ID сотрудника:" + id  + "успешно удалён";
         }
         else {
             return "Сотрудник с таким ID не существует";
         }
     }
-    public  String searchEmployee(String attr,String value) throws IOException, ClassNotFoundException {
+    public  ArrayList<empNode> searchEmployee(String attr,String value) throws IOException, ClassNotFoundException
+    {
+        ArrayList<empNode> array = new ArrayList<empNode>();
         String resultat = "";
         boolean flag = false;
         File file = new File(dataBase);
@@ -361,7 +367,7 @@ public class fileLoader implements model {
                 {
                     if(read.getFirstName().equals(value))
                     {
-                        resultat+="ID сотрудника:"+ res.get(i)[1]+"\n" + reportEmployee(read);
+                        array.add(new empNode(Integer.parseInt(res.get(i)[1]),read));
                         flag = true;
                     }
                     break;
@@ -370,7 +376,7 @@ public class fileLoader implements model {
                 {
                     if(read.getLastName().equals(value))
                     {
-                        resultat+="ID сотрудника:"+ res.get(i)[1]+"\n" + reportEmployee(read);
+                        array.add(new empNode(Integer.parseInt(res.get(i)[1]),read));
                         flag = true;
                     }
                     break;
@@ -379,7 +385,7 @@ public class fileLoader implements model {
                 {
                     if(read.getMiddleName().equals(value))
                     {
-                        resultat+="ID сотрудника:"+ res.get(i)[1]+"\n" + reportEmployee(read);
+                        array.add(new empNode(Integer.parseInt(res.get(i)[1]),read));
                         flag = true;
                     }
                     break;
@@ -388,7 +394,7 @@ public class fileLoader implements model {
                 {
                     if(read.getPhone().equals(value))
                     {
-                        resultat+="ID сотрудника:"+ res.get(i)[1]+"\n" + reportEmployee(read);
+                        array.add(new empNode(Integer.parseInt(res.get(i)[1]),read));
                         flag = true;
                     }
                     break;
@@ -397,7 +403,7 @@ public class fileLoader implements model {
                 {
                     if(read.getOtdel() == Integer.parseInt(value))
                     {
-                        resultat+="ID сотрудника:"+ res.get(i)[1]+"\n" + reportEmployee(read);
+                        array.add(new empNode(Integer.parseInt(res.get(i)[1]),read));
                         flag = true;
                     }
                     break;
@@ -406,7 +412,7 @@ public class fileLoader implements model {
                 {
                     if(read.getSalary() == Integer.parseInt(value))
                     {
-                        resultat+="ID сотрудника:"+ res.get(i)[1]+"\n" + reportEmployee(read);
+                        array.add(new empNode(Integer.parseInt(res.get(i)[1]),read));
                         flag = true;
                     }
                     break;
@@ -414,16 +420,17 @@ public class fileLoader implements model {
                 default:
                 {
                     i=res.size();
-                    return "Указанный атрибут: "+attr+" не существует"+"\nВоспользуйтесь справкой -h";
+                    return null;
                 }
             }
             fileInputStream.close();
             objectInputStream.close();
         }
-        if(!flag) return "Сотрудников с указанным значением атрибута \""+attr+"\" = "+value+" не существует";
-        return resultat;
+        if(!flag) return null;
+        return array;
     }
-    public  void changeDepartment(String id, String attr,String value) throws IOException, ClassNotFoundException {
+    public  String changeDepartment(String id, String attr,String value) throws IOException, ClassNotFoundException {
+
         FileInputStream fileInputStream = new FileInputStream(dataBase+"1_"+id);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
         Department read = (Department) objectInputStream.readObject();
@@ -432,19 +439,33 @@ public class fileLoader implements model {
         switch (attr) {
             case ("имя"): {
                 read.setName(value);
-                break;
+                FileOutputStream outputStream = new FileOutputStream(dataBase+"1_"+id);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                objectOutputStream.writeObject(read);
+                objectOutputStream.close();
+                return "Название отдела изменено";
             }
             case ("директор"): {
-                read.setDirector(value);
-                break;
+                if(checkExistsEmpID(value)){
+                if (Integer.toString(showEmployee(value).data.getOtdel()).equals(id) || Integer.toString(showEmployee(value).data.getOtdel()).equals("0"))
+                {
+                    read.setDirector(value);
+                    changeEmployee(value,"отдел",id);
+                    FileOutputStream outputStream = new FileOutputStream(dataBase+"1_"+id);
+                    ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                    objectOutputStream.writeObject(read);
+                    objectOutputStream.close();
+                    return "Директор отдела успешно изменён";
+                }
+                else return "Указанный сотрудник числится в другом отделе. Измените отдел сотрудника "+value;
+            }
+                else return "Сотрудник с указанным ID не существует";
             }
         }
-        FileOutputStream outputStream = new FileOutputStream(dataBase+"1_"+id);
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        objectOutputStream.writeObject(read);
-        objectOutputStream.close();
+
+        return null;
     }
-    public  void changeEmployee(String id,String attr,String value) throws IOException, ClassNotFoundException {
+    public  String changeEmployee(String id,String attr,String value) throws IOException, ClassNotFoundException {
         FileInputStream fileInputStream = new FileInputStream(dataBase+"0_"+id);
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
         Employee read = (Employee) objectInputStream.readObject();
@@ -453,37 +474,65 @@ public class fileLoader implements model {
         switch (attr) {
             case ("имя"): {
                 read.setFirstName(value);
-                break;
+                FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+id);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                objectOutputStream.writeObject(read);
+                objectOutputStream.close();
+                return "Имя изменено";
             }
             case ("фамилия"): {
                 read.setLastName(value);
-                break;
+                FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+id);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                objectOutputStream.writeObject(read);
+                objectOutputStream.close();
+                return "Фамилия изменена";
             }
             case("отчество"):
             {
                 read.setMiddleName(value);
-                break;
+                FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+id);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                objectOutputStream.writeObject(read);
+                objectOutputStream.close();
+                return "Отчество изменено";
             }
             case("отдел"):
             {
+                if(!checkExistsDepID(value)) return "Указанный отдел не существует";
                 read.setOtdel(Integer.parseInt(value));
-                break;
+                FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+id);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                objectOutputStream.writeObject(read);
+                objectOutputStream.close();
+                return "Отдел изменен";
             }
             case("зарплата"):
             {
+                try{
                 read.setSalary(Integer.parseInt(value));
-                break;
+                FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+id);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                objectOutputStream.writeObject(read);
+                objectOutputStream.close();
+                return"Зарплата изменена";
+                }
+                catch (NumberFormatException ex)
+                {
+                    return "Неверно введена зарплата";
+                }
             }
             case("телефон"):
             {
                 read.setPhone(value);
-                break;
+                FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+id);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+                objectOutputStream.writeObject(read);
+                objectOutputStream.close();
+                return "Номер телефона изменен";
             }
         }
-        FileOutputStream outputStream = new FileOutputStream(dataBase+"0_"+id);
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-        objectOutputStream.writeObject(read);
-        objectOutputStream.close();
+
+        return null;
     }
 }
-*/

@@ -1,25 +1,58 @@
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
+
+import javax.swing.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+class compareEmployee implements Comparator<empNode>
+{
+    @Override
+    public int compare(empNode o1,empNode o2)
+    {
+        String temp1 = (o1.data.getLastName()+o1.data.getFirstName()+o1.data.getMiddleName()).toLowerCase();
+        String temp2 = (o2.data.getLastName()+o2.data.getFirstName()+o2.data.getMiddleName()).toLowerCase();
+        return temp1.compareTo(temp2);
+    }
+}
+class compareDepartment implements Comparator<depNode>
+{
+    @Override
+    public int compare(depNode o1,depNode o2)
+    {
+
+        return o1.data.getName().compareTo(o2.data.getName());
+    }
+}
 
 public class Server implements controller {
-    model Model;
+    private model Model;
     class userThread extends Thread
-    {       String message;
+    {
+            Socket socket;
             private BufferedWriter out;
             private BufferedReader in;
-            public userThread(Socket socket) throws IOException {
-                message = null;
+            userThread(Socket socket) throws IOException {
+                this.socket = socket;
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                 start();
             }
-            public void setMessage(String info)
-            {
-                message = info;
-            }
-        public void query(String stroka) throws IOException, ClassNotFoundException {
+        void query(String stroka) throws IOException, ClassNotFoundException, TransformerException, ParserConfigurationException {
             String[] subStr;
             subStr = stroka.split(" ");
             switch(subStr[0])
@@ -44,7 +77,7 @@ public class Server implements controller {
                                     "\n-change - изменить"+
                                     "\n\t-department [id] [attr] [value] - значение параметра [attr](имя|директор) отдела [id] на новое значение [value]"+
                                     "\n\t-employee [id] [attr] [value] - значение параметра [attr](имя|фамилия|отчество|отдел|телефон|зарплата) сотрудника [id] на новое значение [value]";
-                    send(info);
+                    send(xmlGenerator.message(info));
                     break;
                 }
                 case("-create"):
@@ -54,18 +87,27 @@ public class Server implements controller {
                         case("-department"):
                         {
                             if(subStr.length<4)
-                                send("Ошибка формирования запроса.\nДля справки воспользуйтесь -h");
-                            else
-                                send(Model.createDepartment(subStr[2],subStr[3]));
-                            break;
+                                send(xmlGenerator.message("Ошибка формирования запроса."));
+                            else {
+
+                                if(Model.createDepartment(subStr[2], subStr[3]))
+                                    send(xmlGenerator.message("Объект успешно добавлен"));
+                                else
+                                    send(xmlGenerator.message("Неверно указаны параметры"));
+                            }
+                                break;
                         }
                         case("-employee"):
                         {
                             if(subStr.length<8)
-                              send("Ошибка формирования запроса.\nДля справки воспользуйтесь -h");
+                              send(xmlGenerator.message("Ошибка формирования запроса."));
                             else
                             {
-                                Model.createEmployee(subStr[2],subStr[3],subStr[4],subStr[5],subStr[6],subStr[7]);
+
+                                if(Model.createEmployee(subStr[2],subStr[3],subStr[4],subStr[5],subStr[6],subStr[7]))
+                                    send(xmlGenerator.message("Объект успешно добавлен"));
+                                else
+                                    send(xmlGenerator.message("Объект уже существует или сотрудник управляет другим отделом"));
                             }
                             break;
                         }
@@ -75,7 +117,7 @@ public class Server implements controller {
                 case("-show"):
                 {
                     if (subStr[0].equals("-show") && subStr.length == 1)
-                        send("Недостаточно аргументов.\nВоспользуйтесь справкой -h.");
+                        send(xmlGenerator.message("Недостаточно аргументов."));
                     else
                         switch (subStr[1])
                         {
@@ -83,31 +125,35 @@ public class Server implements controller {
                             {
                                 if(subStr.length==2)
                                 {
-                                    send(Model.showDepartments());
+                                    send(xmlGenerator.getDepartments(Model.showDepartments()));
                                 } else if (subStr.length==3)
                                 {
-                                    send(Model.showDepartment(subStr[2]));
+                                    ArrayList<depNode> t = new ArrayList<depNode>();
+                                    t.add(Model.showDepartment(subStr[2]));
+                                    send(xmlGenerator.getDepartments(t));
                                 }
                                 else
                                 {
-                                   send("Неверное количество аргументов команды -show.\nВоспользуйтесь справкой -h");
+                                   send(xmlGenerator.message("Неверное количество аргументов команды -show."));
                                 }
                                 break;
                             }
                             case("-employee"): {
                                 if (subStr.length == 2) {
 
-                                    send(Model.showEmployees());
+                                    send(xmlGenerator.getEmployees(Model.showEmployees(),0));
                                 } else if(subStr.length==3) {
-                                    send(Model.showEmployee(subStr[2]));
+                                    ArrayList<empNode> t = new ArrayList<empNode>();
+                                    t.add(Model.showEmployee(subStr[2]));
+                                    send(xmlGenerator.getEmployees(t,0));
                                 }else
                                 {
-                                    send("Неверное количество аргументов команды -show.\nВоспользуйтесь справкой -h");
+                                    send(xmlGenerator.message("Неверное количество аргументов команды -show."));
                                 }
                                 break;
                             }
                             default: {
-                                send("Неверный аргумент "+subStr[1]+".\nВоспользуйтесь справкой -h.");
+                                send(xmlGenerator.message("Неверный аргумент "+subStr[1]));
                                 break;
                             }
                         }
@@ -121,14 +167,21 @@ public class Server implements controller {
                         {
                             if(subStr.length==3)
                             {
-                                send(Model.deleteDepartment(subStr[2]));
+                                if(subStr[2].equals("0"))
+                                {
+                                    send(xmlGenerator.message("Нельзя удалить отдел \"0\""));
+                                }
+                                  else
+                                      {
+                                      send(xmlGenerator.message(Model.deleteDepartment(subStr[2])));
+                                }
                             }
                             break;
                         }
                         case("-employee"): {
                             if(subStr.length==3)
                             {
-                                send(Model.deleteEmployee(subStr[2]));
+                                send(xmlGenerator.message(Model.deleteEmployee(subStr[2])));
                             }
                             break;
                         }
@@ -141,14 +194,14 @@ public class Server implements controller {
                         {
                             if(subStr.length==5)
                             {
-                                Model.changeDepartment(subStr[2],subStr[3],subStr[4]);
+                                send(xmlGenerator.message(Model.changeDepartment(subStr[2],subStr[3],subStr[4])));
                             }
                             break;
                         }
                         case("-employee"):
                         {
                             if(subStr.length==5)
-                                Model.changeEmployee(subStr[2],subStr[3],subStr[4]);
+                                send(xmlGenerator.message(Model.changeEmployee(subStr[2],subStr[3],subStr[4])));
                             break;
                         }
                     }
@@ -162,15 +215,17 @@ public class Server implements controller {
                         {
                             if(subStr.length == 3)
                             {
-                                send(Model.showDepartment(subStr[2]));
+                                ArrayList<depNode> t = new ArrayList<depNode>();
+                                t.add(Model.showDepartment(subStr[2]));
+                                send(xmlGenerator.getDepartments(t));
                             }
                             else if(subStr.length==4)
                             {
-                               send(Model.searchDepartament(subStr[2],subStr[3]));
+                               send(xmlGenerator.getDepartments(Model.searchDepartament(subStr[2],subStr[3])));
                             }
                             else
                             {
-                                send("Неверное количество аргументов команды -search.\nВоспользуйтесь справкой -h");
+                                send(xmlGenerator.message("Неверное количество аргументов команды -search."));
                             }
                             break;
                         }
@@ -178,80 +233,120 @@ public class Server implements controller {
                         {
                             if(subStr.length == 3)
                             {
-                                send(Model.showEmployee(subStr[2]));
+                                ArrayList<empNode> t = new ArrayList<empNode>();
+                                t.add(Model.showEmployee(subStr[2]));
+                                send(xmlGenerator.getEmployees(t,0));
                             }
-                            if(subStr.length==4)
+                            else if(subStr.length==4)
                             {
-                                send(Model.searchEmployee(subStr[2],subStr[3]));
-                            } else
-                            {
-                                send("Неверное количество аргументов команды -search.\nВоспользуйтесь справкой -h");
+                                ArrayList<empNode> t = Model.searchEmployee(subStr[2],subStr[3]);
+                                if(t!=null)
+                                send(xmlGenerator.getEmployees(t,0));
+                                else
+                                    send(xmlGenerator.message("Не удалось найти файлы с указанными параметрами: "+subStr[2]+":"+subStr[3]));
                             }
                             break;
                         }
-                    }
-                    else
-                    {
-                        send("Неверное количество аргументов команды -search.\nВоспользуйтесь справкой -h");
                     }
                     break;
                 }
                 case("-time"):
                 {
-                    send((new Date()).toString());
+                    send(xmlGenerator.message((new Date()).toString()));
                     break;
                 }
                 case(""):break;
                 default:
                 {
-                    send("Неверный аргумент: "+subStr[0]+"\nВоспользуйтесь справкой -h.");
+                    send(xmlGenerator.message("Неверный аргумент: "+subStr[0]));
                 }
             }
         }
             @Override
-            public void run()
-            {
+            public void run() {
                 String word;
-                try
-                {
-                    while(true)
-                    {
+                try {
+                    while (true) {
                         word = in.readLine();
-                        if(word.equals("stop"))
+                        if(word.equals("shutdown"))
                         {
-                            this.send("NAXUI STOP NAJAL?");
+                            out.close();
+                            in.close();
+                            socket.close();
                             break;
                         }
-                        send("Вы запросили: "+word);
                         query(word);
+                        word = null;
                     }
-                } catch (IOException | ClassNotFoundException e) {
+                } catch (IOException | ClassNotFoundException | TransformerException | ParserConfigurationException e) {
                     e.printStackTrace();
                 }
+
             }
-        private void send(String msg)
+            private void send(Document doc)
         {
             try
             {
-                out.write(msg+ "\n");
+                DOMImplementationLS domImplementation = (DOMImplementationLS) doc.getImplementation();
+                LSSerializer lsSerializer = domImplementation.createLSSerializer();
+                out.write(lsSerializer.writeToString(doc));
+                out.newLine();
                 out.flush();
-                msg=null;
             }
             catch (IOException ignored){}
+
         }
     }
-    private BufferedReader in;
-    private BufferedWriter out;
-
-
     public Server() throws IOException {
-        Model = new fileLoader();
+        JFileChooser fileChooser = new JFileChooser();
+        Model = new fileLoaderXml();
+        fileChooser.setDialogTitle("Выбор директории БД");
+        // Определение режима - только каталог
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = fileChooser.showOpenDialog(fileChooser);
+        // Если директория выбрана, покажем ее в сообщении
+        String temp = null;
+        if (result == JFileChooser.APPROVE_OPTION )
+            temp =  fileChooser.getSelectedFile().getPath();
+        if(temp!=null)
+            ((fileLoaderXml)Model).setDataBase(temp+"\\");
         connect();
     }
-
     @Override
     public void connect() throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(4400)) {
+        boolean flag = true;
+        int port = 4400;
+        String dialogMessage = "Введите порт";
+        while(flag)
+        {
+            String temp = JOptionPane.showInputDialog(dialogMessage);
+            try {
+                port = Integer.parseInt(temp);
+                if (port > 10000 || port < 1) {
+                    dialogMessage = "Введенный порт неверен. Повторите ввод";
+                } else {
+                    flag = false;
+                }
+                ServerSocket serverSocket = new ServerSocket(port);
+                while (true) {
+                    Socket socket = serverSocket.accept();
+                    new userThread(socket);
+
+                }
+
+            }
+            catch (NumberFormatException e)
+            {
+                flag = true;
+            }
+            catch (IOException e)
+            {
+                flag = true;
+                dialogMessage = "Введенный порт занят, выберите другой";
+            }
+
+        }
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 Socket socket = serverSocket.accept();
                 try {
@@ -261,7 +356,7 @@ public class Server implements controller {
                 }
             }
         }
-            }
+    }
 
 }
 

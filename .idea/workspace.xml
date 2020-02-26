@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="909ec9a7-2c59-4593-b498-e21da2bb073f" name="Default Changelist" comment="" />
+    <list default="true" id="ded540b4-1af3-47ec-925a-d200444dc1df" name="Default Changelist" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,22 +15,41 @@
       </list>
     </option>
   </component>
-  <component name="ProjectId" id="1X82shK879gouMrFY7wAFc6xQRv" />
-  <component name="ProjectViewState">
-    <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showExcludedFiles" value="true" />
-    <option name="showLibraryContents" value="true" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="ProjectId" id="1XnZfc2fetLBcJGCyGfwVZ7qTI4" />
   <component name="PropertiesComponent">
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Modules" />
-    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.tabs" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Рафаэль\Documents\GitHub\Lab2-server\.idea" />
+      <recent name="C:\Users\Рафаэль\Desktop\Учеба\Уник\НиКПО\server\Model\src" />
+      <recent name="C:\Users\Рафаэль\Desktop\Учеба\Уник\НиКПО\server\Model" />
+      <recent name="C:\Users\Рафаэль\Desktop\Учеба\Уник\НиКПО\server\Controller\src" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
   </component>
   <component name="RunManager">
     <configuration name="main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="main" />
-      <module name="Controller" />
+      <module name="server" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -45,46 +65,25 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="909ec9a7-2c59-4593-b498-e21da2bb073f" name="Default Changelist" comment="" />
-      <created>1580413609203</created>
+      <changelist id="ded540b4-1af3-47ec-925a-d200444dc1df" name="Default Changelist" comment="" />
+      <created>1581683922981</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1580413609203</updated>
+      <updated>1581683922981</updated>
     </task>
     <servers />
   </component>
-  <component name="WindowStateProjectService">
-    <state x="552" y="182" key="#Project_Structure" timestamp="1580413653116">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="552" y="182" key="#Project_Structure/0.0.1920.1040@0.0.1920.1040" timestamp="1580413653116" />
-    <state x="828" y="182" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1580414067702">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="828" y="182" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1580414067702" />
-    <state x="731" y="330" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1580413816071">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="731" y="330" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1580413816071" />
-    <state width="914" height="281" key="GridCell.Tab.0.bottom" timestamp="1580414091040">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="914" height="281" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1580414091040" />
-    <state width="914" height="281" key="GridCell.Tab.0.center" timestamp="1580414091040">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="914" height="281" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1580414091040" />
-    <state width="914" height="281" key="GridCell.Tab.0.left" timestamp="1580414091040">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="914" height="281" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1580414091040" />
-    <state width="914" height="281" key="GridCell.Tab.0.right" timestamp="1580414091040">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state width="914" height="281" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1580414091040" />
-    <state x="343" y="147" key="new project wizard" timestamp="1580413947308">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="343" y="147" key="new project wizard/0.0.1920.1040@0.0.1920.1040" timestamp="1580413947308" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
